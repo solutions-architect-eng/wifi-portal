@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,58 +7,76 @@
     <title>Wi-Fi Access Portal</title>
     <style>
         :root {
-            --primary-color: #0056b3; --primary-hover: #003d82; --bg-color: #f4f6f9;
-            --card-bg: #ffffff; --text-main: #333333; --text-muted: #6c757d;
-            --border-color: #e0e0e0; --error-color: #d9534f; --success-color: #28a745;
+            --primary-color: #F57C00; /* Beautiful Orange */
+            --primary-hover: #E65100; /* Darker Orange */
+            --bg-color: rgba(0,0,0,0.6);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #333333; 
+            --text-muted: #6c757d;
+            --border-color: #e0e0e0; 
+            --error-color: #d9534f; 
+            --success-color: #28a745;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center;
-            align-items: center; min-height: 100vh; padding: 20px;
+            /* Local Background Image */
+            background: url('bg.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            color: var(--text-main); display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
         }
-        .container { width: 100%; max-width: 400px; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); overflow: hidden; }
-        .header { background-color: var(--primary-color); color: white; text-align: center; padding: 30px 20px; }
+        .container { width: 100%; max-width: 400px; background-color: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; backdrop-filter: blur(10px); }
+        .header { background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: white; text-align: center; padding: 30px 20px; }
         .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 5px; }
         .header p { font-size: 14px; opacity: 0.9; }
         .form-body { padding: 30px 25px; }
         .alert-error { background-color: #f8d7da; color: var(--error-color); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #f5c6cb; display: none; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--text-main); }
-        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; transition: border-color 0.2s; outline: none; }
-        .form-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
+        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; transition: border-color 0.2s; outline: none; background-color: #fff; }
+        .form-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(245, 124, 0, 0.2); }
         .checkbox-group { display: flex; align-items: flex-start; margin-bottom: 25px; }
         .checkbox-group input { margin-top: 3px; margin-right: 10px; cursor: pointer; width: 16px; height: 16px; }
         .checkbox-group label { font-size: 12px; color: var(--text-muted); cursor: pointer; line-height: 1.4; }
-        .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .btn-connect:hover { background-color: var(--primary-hover); }
-        .btn-connect:disabled { background-color: #b0c4de; cursor: not-allowed; }
-        .footer { text-align: center; padding: 15px; background-color: #fafafa; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); }
-        .alert-info { background-color: #d1ecf1; color: #0c5460; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center; }
-        #step-2-otp { display: none; }
+        .btn-connect:disabled { background-color: #FFB74D; cursor: not-allowed; }
+        .footer { text-align: center; padding: 15px; background-color: #f8f9fa; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); }
+        .alert-info { background-color: #FFF3E0; color: #E65100; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #FFE0B2; }
+        
+        /* Step visibility */
+        #step-2-otp, #step-3-success { display: none; }
+
+        /* Success Page Styling */
+        .success-icon { font-size: 60px; color: var(--primary-color); margin-bottom: 20px; }
+        .success-title { font-size: 24px; font-weight: 700; color: var(--success-color); margin-bottom: 10px; }
+        .branding { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .branding h3 { color: var(--primary-color); font-size: 16px; margin-bottom: 5px; }
+        .branding p { color: var(--text-muted); font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Wi-Fi Access Portal</h1>
-            <p>Register & Verify to connect</p>
+            <p>Secure Verification Required</p>
         </div>
         <div class="form-body">
             <div class="alert-error" id="error-message"></div>
             
             <!-- Hidden form to submit authentication back to Grandstream -->
             <form name="sendin" id="sendin-form" action="#" method="post">
-                <input type="hidden" name="username" id="mikrotik-username" value="guest" />
-                <input type="hidden" name="password" id="mikrotik-password" value="guest" />
-                <!-- Grandstream requires these parameters to authenticate the specific device -->
+                <input type="hidden" name="username" id="auth-username" value="guest" />
+                <input type="hidden" name="password" id="auth-password" value="guest" />
+                <!-- Grandstream requires these parameters -->
                 <input type="hidden" name="gw_address" id="gw_address" />
                 <input type="hidden" name="gw_port" id="gw_port" />
                 <input type="hidden" name="mac" id="mac" />
                 <input type="hidden" name="url" id="url" />
             </form>
 
-            <!-- Step 1: User Details -->
+            <!-- STEP 1: User Details -->
             <div id="step-1-details">
                 <div class="form-group">
                     <label for="user-name">Full Name</label>
@@ -66,7 +85,7 @@
                 <div class="form-group">
                     <label for="user-phone">Cellphone Number (WhatsApp)</label>
                     <input type="tel" id="user-phone" value="+266" placeholder="+266XXXXXXXX" required autocomplete="off">
-                    <small style="color:var(--error-color); font-size:11px; font-weight: bold;">⚠️ Keep Mobile Data ON to receive WhatsApp code.</small>
+                    <small style="color:var(--primary-hover); font-size:11px; font-weight: bold;">⚠️ Mobile Data MUST be ON to receive code.</small>
                 </div>
                 <div class="form-group">
                     <label for="user-email">Email Address</label>
@@ -79,21 +98,34 @@
                 <button type="button" class="btn-connect" id="otp-btn" onclick="requestWhatsAppOTP()">Send WhatsApp Code</button>
             </div>
 
-            <!-- Step 2: OTP Verification -->
-            <div id="step-2-otp">
-                <div class="alert-info">A 4-digit code was sent to your WhatsApp. Enter it below to get internet access.</div>
+            <!-- STEP 2: OTP Verification -->
+            <div id="step-2-otp" style="text-align: center;">
+                <div class="alert-info">A 4-digit code was sent to your WhatsApp. Enter it below to connect.</div>
                 <div class="form-group">
                     <label for="user-otp">4-Digit Verification Code</label>
-                    <input type="text" id="user-otp" placeholder="e.g. 1234" maxlength="4" required autocomplete="off">
+                    <input type="text" id="user-otp" placeholder="• • • •" maxlength="4" required autocomplete="off" style="text-align:center; font-size:24px; letter-spacing:8px;">
                 </div>
-                <button type="button" class="btn-connect" id="submit-btn" style="background-color: var(--success-color);" onclick="processFinalLogin()">Verify & Connect to Internet</button>
+                <button type="button" class="btn-connect" id="submit-btn" style="background-color: var(--success-color);" onclick="processFinalLogin()">Verify & Connect</button>
+            </div>
+
+            <!-- STEP 3: Success Page -->
+            <div id="step-3-success" style="text-align: center;">
+                <div class="success-icon">✓</div>
+                <div class="success-title">Successfully Verified!</div>
+                <p style="color: var(--text-muted);">You are now connected to the internet.</p>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 10px;">This page will close automatically...</p>
+                
+                <div class="branding">
+                    <h3>Powered by T-Connect</h3>
+                    <p>Starlink Reseller</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // PASTE YOUR GOOGLE SCRIPT URL HERE
-        var googleScriptURL = "https://script.google.com/macros/s/AKfycbzBvRbOggY8197GM3s_n4hM5zD5QmmHJ0ne9VO8oRfv6J9JPly5qhoRAallk9G5NOWyhg/exec"; 
+         var googleScriptURL = "https://script.google.com/macros/s/AKfycbzBvRbOggY8197GM3s_n4hM5zD5QmmHJ0ne9VO8oRfv6J9JPly5qhoRAallk9G5NOWyhg/exec";  
 
         window.onload = function() {
             // 1. Capture Grandstream URL parameters
@@ -108,9 +140,6 @@
             document.getElementById('gw_port').value = gwPort;
             document.getElementById('mac').value = mac;
             document.getElementById('url').value = url;
-
-            // 3. Dynamically set the form action to the Grandstream Router
-            document.getElementById('sendin-form').action = `http://${gwAddress}:${gwPort}/cgi-bin/luci/captive_portal/login`;
         };
 
         function requestWhatsAppOTP() {
@@ -135,7 +164,7 @@
             var img = new Image();
             img.src = url;
 
-            // Switch the screen to the OTP input
+            // Switch to OTP screen
             setTimeout(function() {
                 document.getElementById('step-1-details').style.display = 'none';
                 document.getElementById('step-2-otp').style.display = 'block';
@@ -144,7 +173,6 @@
 
         function processFinalLogin() {
             var otp = document.getElementById('user-otp').value.trim();
-
             if (otp === "") { alert("Please enter the 4-digit code."); return false; }
 
             var btn = document.getElementById('submit-btn');
@@ -157,16 +185,30 @@
                 .then(function(res) { return res.text(); })
                 .then(function(responseText) {
                     if (responseText.trim() === "Success") {
-                        // OTP is correct! Submit the hidden form to the Grandstream Router to grant internet
-                        document.getElementById('sendin-form').submit();
+                        // 1. Show Success Screen
+                        document.getElementById('step-2-otp').style.display = 'none';
+                        document.getElementById('step-3-success').style.display = 'block';
+
+                        // 2. Wait 3 seconds so user sees the branding, then submit to router
+                        setTimeout(function() {
+                            var gwAddress = document.getElementById('gw_address').value;
+                            var gwPort = document.getElementById('gw_port').value;
+                            
+                            // Set form action to Grandstream login endpoint
+                            document.getElementById('sendin-form').action = `http://${gwAddress}:${gwPort}/cgi-bin/luci/captive_portal/login`;
+                            
+                            // Submit the form to grant internet
+                            document.getElementById('sendin-form').submit();
+                        }, 3000);
+
                     } else {
                         alert("Invalid Verification Code. Please try again.");
-                        btn.innerText = "Verify & Connect to Internet"; btn.disabled = false;
+                        btn.innerText = "Verify & Connect"; btn.disabled = false;
                     }
                 })
                 .catch(function(err) {
                     alert("Verification server unreachable. Please try again.");
-                    btn.innerText = "Verify & Connect to Internet"; btn.disabled = false;
+                    btn.innerText = "Verify & Connect"; btn.disabled = false;
                 });
         }
     </script>
