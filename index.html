@@ -1,5 +1,5 @@
 
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,22 +7,14 @@
     <title>Wi-Fi Access Portal</title>
     <style>
         :root {
-            --primary-color: #F57C00; /* Beautiful Orange */
-            --primary-hover: #E65100; /* Darker Orange */
-            --bg-color: rgba(0,0,0,0.6);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #333333; 
-            --text-muted: #6c757d;
-            --border-color: #e0e0e0; 
-            --error-color: #d9534f; 
-            --success-color: #28a745;
+            --primary-color: #F57C00; --primary-hover: #E65100; --bg-color: rgba(0,0,0,0.6);
+            --card-bg: rgba(255, 255, 255, 0.95); --text-main: #333333; --text-muted: #6c757d;
+            --border-color: #e0e0e0; --error-color: #d9534f; --success-color: #28a745;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            /* Local Background Image */
-            background: url('bg.jpg') no-repeat center center fixed; 
-            background-size: cover;
+            background: url('bg.jpg') no-repeat center center fixed; background-size: cover;
             color: var(--text-main); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 20px;
         }
@@ -43,13 +35,10 @@
         .btn-connect:hover { background-color: var(--primary-hover); }
         .btn-connect:disabled { background-color: #FFB74D; cursor: not-allowed; }
         .footer { text-align: center; padding: 15px; background-color: #f8f9fa; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); }
-        .alert-info { background-color: #FFF3E0; color: #E65100; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #FFE0B2; }
         
-        /* Step visibility */
-        #step-2-otp, #step-3-success { display: none; }
-
         /* Success Page Styling */
-        .success-icon { font-size: 60px; color: var(--primary-color); margin-bottom: 20px; }
+        #step-2-success { display: none; text-align: center; }
+        .success-icon { font-size: 60px; color: var(--success-color); margin-bottom: 20px; }
         .success-title { font-size: 24px; font-weight: 700; color: var(--success-color); margin-bottom: 10px; }
         .branding { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
         .branding h3 { color: var(--primary-color); font-size: 16px; margin-bottom: 5px; }
@@ -60,7 +49,7 @@
     <div class="container">
         <div class="header">
             <h1>Wi-Fi Access Portal</h1>
-            <p>Secure Verification Required</p>
+            <p>Connect & Verify</p>
         </div>
         <div class="form-body">
             <div class="alert-error" id="error-message"></div>
@@ -69,7 +58,6 @@
             <form name="sendin" id="sendin-form" action="#" method="post">
                 <input type="hidden" name="username" id="auth-username" value="guest" />
                 <input type="hidden" name="password" id="auth-password" value="guest" />
-                <!-- Grandstream requires these parameters -->
                 <input type="hidden" name="gw_address" id="gw_address" />
                 <input type="hidden" name="gw_port" id="gw_port" />
                 <input type="hidden" name="mac" id="mac" />
@@ -83,9 +71,8 @@
                     <input type="text" id="user-name" placeholder="e.g. John Doe" required autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label for="user-phone">Cellphone Number (WhatsApp)</label>
+                    <label for="user-phone">Cellphone Number</label>
                     <input type="tel" id="user-phone" value="+266" placeholder="+266XXXXXXXX" required autocomplete="off">
-                    <small style="color:var(--primary-hover); font-size:11px; font-weight: bold;">⚠️ Mobile Data MUST be ON to receive code.</small>
                 </div>
                 <div class="form-group">
                     <label for="user-email">Email Address</label>
@@ -93,27 +80,17 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="privacy-check" required>
-                    <label for="privacy-check">I agree to the Terms & Conditions.</label>
+                    <label for="privacy-check">I certify this information is true. I agree to the Terms & Conditions and consent to my data being stored for 6 months.</label>
                 </div>
-                <button type="button" class="btn-connect" id="otp-btn" onclick="requestWhatsAppOTP()">Send WhatsApp Code</button>
+                <button type="button" class="btn-connect" id="submit-btn" onclick="processLogin()">Connect to Internet</button>
             </div>
 
-            <!-- STEP 2: OTP Verification -->
-            <div id="step-2-otp" style="text-align: center;">
-                <div class="alert-info">A 4-digit code was sent to your WhatsApp. Enter it below to connect.</div>
-                <div class="form-group">
-                    <label for="user-otp">4-Digit Verification Code</label>
-                    <input type="text" id="user-otp" placeholder="• • • •" maxlength="4" required autocomplete="off" style="text-align:center; font-size:24px; letter-spacing:8px;">
-                </div>
-                <button type="button" class="btn-connect" id="submit-btn" style="background-color: var(--success-color);" onclick="processFinalLogin()">Verify & Connect</button>
-            </div>
-
-            <!-- STEP 3: Success Page -->
-            <div id="step-3-success" style="text-align: center;">
+            <!-- STEP 2: Success Page -->
+            <div id="step-2-success">
                 <div class="success-icon">✓</div>
-                <div class="success-title">Successfully Verified!</div>
-                <p style="color: var(--text-muted);">You are now connected to the internet.</p>
-                <p style="color: var(--text-muted); font-size: 12px; margin-top: 10px;">This page will close automatically...</p>
+                <div class="success-title">You're Connected!</div>
+                <p style="color: var(--text-muted);">A verification code and link have been sent to your Email and WhatsApp.</p>
+                <p style="color: var(--error-color); font-size: 13px; font-weight: bold; margin-top: 15px;">Please verify your account to maintain access.</p>
                 
                 <div class="branding">
                     <h3>Powered by T-Connect</h3>
@@ -124,25 +101,18 @@
     </div>
 
     <script>
-        // PASTE YOUR GOOGLE SCRIPT URL HERE
-         var googleScriptURL = "https://script.google.com/macros/s/AKfycbzBvRbOggY8197GM3s_n4hM5zD5QmmHJ0ne9VO8oRfv6J9JPly5qhoRAallk9G5NOWyhg/exec";  
+        // PASTE YOUR NEW GOOGLE SCRIPT URL HERE
+          var googleScriptURL = "https://script.google.com/macros/s/AKfycbzBvRbOggY8197GM3s_n4hM5zD5QmmHJ0ne9VO8oRfv6J9JPly5qhoRAallk9G5NOWyhg/exec";  
 
         window.onload = function() {
-            // 1. Capture Grandstream URL parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const gwAddress = urlParams.get('gw_address') || '192.168.1.1';
-            const gwPort = urlParams.get('gw_port') || '80';
-            const mac = urlParams.get('mac') || '';
-            const url = urlParams.get('url') || '';
-
-            // 2. Store them in the hidden form
-            document.getElementById('gw_address').value = gwAddress;
-            document.getElementById('gw_port').value = gwPort;
-            document.getElementById('mac').value = mac;
-            document.getElementById('url').value = url;
+            document.getElementById('gw_address').value = urlParams.get('gw_address') || '192.168.1.1';
+            document.getElementById('gw_port').value = urlParams.get('gw_port') || '80';
+            document.getElementById('mac').value = urlParams.get('mac') || '';
+            document.getElementById('url').value = urlParams.get('url') || '';
         };
 
-        function requestWhatsAppOTP() {
+        function processLogin() {
             var name = document.getElementById('user-name').value.trim();
             var phone = document.getElementById('user-phone').value.trim();
             var email = document.getElementById('user-email').value.trim();
@@ -156,60 +126,26 @@
                 document.getElementById('user-phone').value = phone;
             }
 
-            var btn = document.getElementById('otp-btn');
-            btn.innerText = "Sending..."; btn.disabled = true;
+            var btn = document.getElementById('submit-btn');
+            btn.innerText = "Connecting..."; btn.disabled = true;
 
-            // Trigger Google Script to send WhatsApp OTP
+            // 1. Trigger Google Script to send Email/WhatsApp in the background
             var url = googleScriptURL + "?action=send&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
             var img = new Image();
             img.src = url;
 
-            // Switch to OTP screen
+            // 2. Show Success Screen
+            document.getElementById('step-1-details').style.display = 'none';
+            document.getElementById('step-2-success').style.display = 'block';
+
+            // 3. Wait 2 seconds, then log them into the router
             setTimeout(function() {
-                document.getElementById('step-1-details').style.display = 'none';
-                document.getElementById('step-2-otp').style.display = 'block';
-            }, 1500);
-        }
-
-        function processFinalLogin() {
-            var otp = document.getElementById('user-otp').value.trim();
-            if (otp === "") { alert("Please enter the 4-digit code."); return false; }
-
-            var btn = document.getElementById('submit-btn');
-            btn.innerText = "Verifying..."; btn.disabled = true;
-
-            var phone = document.getElementById('user-phone').value.trim();
-            var verifyUrl = googleScriptURL + "?action=verify&phone=" + encodeURIComponent(phone) + "&otp=" + encodeURIComponent(otp);
-            
-            fetch(verifyUrl)
-                .then(function(res) { return res.text(); })
-                .then(function(responseText) {
-                    if (responseText.trim() === "Success") {
-                        // 1. Show Success Screen
-                        document.getElementById('step-2-otp').style.display = 'none';
-                        document.getElementById('step-3-success').style.display = 'block';
-
-                        // 2. Wait 3 seconds so user sees the branding, then submit to router
-                        setTimeout(function() {
-                            var gwAddress = document.getElementById('gw_address').value;
-                            var gwPort = document.getElementById('gw_port').value;
-                            
-                            // Set form action to Grandstream login endpoint
-                            document.getElementById('sendin-form').action = `http://${gwAddress}:${gwPort}/cgi-bin/luci/captive_portal/login`;
-                            
-                            // Submit the form to grant internet
-                            document.getElementById('sendin-form').submit();
-                        }, 3000);
-
-                    } else {
-                        alert("Invalid Verification Code. Please try again.");
-                        btn.innerText = "Verify & Connect"; btn.disabled = false;
-                    }
-                })
-                .catch(function(err) {
-                    alert("Verification server unreachable. Please try again.");
-                    btn.innerText = "Verify & Connect"; btn.disabled = false;
-                });
+                var gwAddress = document.getElementById('gw_address').value;
+                var gwPort = document.getElementById('gw_port').value;
+                
+                document.getElementById('sendin-form').action = `http://${gwAddress}:${gwPort}/cgi-bin/luci/captive_portal/login`;
+                document.getElementById('sendin-form').submit();
+            }, 2000);
         }
     </script>
 </body>
