@@ -1,4 +1,3 @@
- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +22,6 @@
         .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 5px; }
         .header p { font-size: 14px; opacity: 0.9; }
         .form-body { padding: 30px 25px; }
-        .alert-error { background-color: #f8d7da; color: var(--error-color); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #f5c6cb; display: none; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--text-main); }
         .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; transition: border-color 0.2s; outline: none; background-color: #fff; }
@@ -48,11 +46,9 @@
     <div class="container">
         <div class="header">
             <h1>Wi-Fi Access Portal</h1>
-            <p>Connect & Verify</p>
+            <p>Connect to the Internet</p>
         </div>
         <div class="form-body">
-            <div class="alert-error" id="error-message"></div>
-
             <!-- STEP 1: User Details -->
             <div id="step-1-details">
                 <div class="form-group">
@@ -78,8 +74,7 @@
             <div id="step-2-success">
                 <div class="success-icon">✓</div>
                 <div class="success-title">You're Connected!</div>
-                <p style="color: var(--text-muted);">A verification link has been sent to your Email and WhatsApp.</p>
-                <p style="color: var(--error-color); font-size: 13px; font-weight: bold; margin-top: 15px;">Please verify your account to maintain access.</p>
+                <p style="color: var(--text-muted);">Enjoy your internet access.</p>
                 
                 <div class="branding">
                     <h3>Powered by T-Connect</h3>
@@ -90,17 +85,17 @@
     </div>
 
     <script>
-        // PASTE YOUR GOOGLE SCRIPT URL HERE
-        var googleScriptURL = "https://script.google.com/macros/s/AKfycbwgckjl7bwYNmpqU6H8g7_cod1v0IWvBVcsn5FS0jDbgAnRkRRsBuuNbHFRTeikwGXgQA/exec";   
+        // PASTE YOUR NEW GOOGLE SCRIPT URL HERE
+        var googleScriptURL = "https://script.google.com/macros/s/AKfycbxTo-dSe23r7JLRas2Y_Q5uYeRdNSFNH6BLI7TFgkVfdi9iostJbE0zydncaeB2O3ulow/exec"; 
 
-        // Capture Grandstream URL parameters on load
-        var gwAddress = "192.168.1.1";
-        var gwPort = "80";
+        var gwAddress = "192.168.80.1"; // Your Grandstream Router IP
+        var gwPort = "443";             // 443 for HTTPS
         var mac = "";
         var url = "";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
+            // These will override the defaults above if the router passes them in the URL
             gwAddress = urlParams.get('gw_address') || gwAddress;
             gwPort = urlParams.get('gw_port') || gwPort;
             mac = urlParams.get('mac') || mac;
@@ -124,8 +119,8 @@
             var btn = document.getElementById('submit-btn');
             btn.innerText = "Connecting..."; btn.disabled = true;
 
-            // 1. Trigger Google Script to send Email/WhatsApp in the background
-            var scriptUrl = googleScriptURL + "?action=send&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
+            // 1. Trigger Google Script to log data in the background
+            var scriptUrl = googleScriptURL + "?action=log&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
             var img = new Image();
             img.src = scriptUrl;
 
@@ -133,17 +128,16 @@
             document.getElementById('step-1-details').style.display = 'none';
             document.getElementById('step-2-success').style.display = 'block';
 
-            // 3. Wait 2 seconds, then redirect to the Grandstream router login endpoint
-            // This avoids the HTTPS to HTTP "Bad Gateway" block!
+            // 3. Wait 2 seconds so user sees the branding, then redirect to router to grant internet
             setTimeout(function() {
-                var loginUrl = "http://" + gwAddress + ":" + gwPort + "/cgi-bin/luci/captive_portal/login";
+                var loginUrl = "https://" + gwAddress + ":" + gwPort + "/cgi-bin/luci/captive_portal/login";
                 loginUrl += "?username=guest&password=guest";
                 loginUrl += "&mac=" + encodeURIComponent(mac);
                 loginUrl += "&url=" + encodeURIComponent(url);
                 
                 // Redirect the browser to the router to grant internet access
                 window.location.href = loginUrl;
-            }, 2500);
+            }, 2000);
         }
     </script>
 </body>
