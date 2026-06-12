@@ -1,5 +1,5 @@
-
-  <!DOCTYPE html>
+ 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -34,7 +34,6 @@
         .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .btn-connect:hover { background-color: var(--primary-hover); }
         .btn-connect:disabled { background-color: #FFB74D; cursor: not-allowed; }
-        .footer { text-align: center; padding: 15px; background-color: #f8f9fa; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); }
         
         /* Success Page Styling */
         #step-2-success { display: none; text-align: center; }
@@ -53,16 +52,6 @@
         </div>
         <div class="form-body">
             <div class="alert-error" id="error-message"></div>
-            
-            <!-- Hidden form to submit authentication back to Grandstream -->
-            <form name="sendin" id="sendin-form" action="#" method="post">
-                <input type="hidden" name="username" id="auth-username" value="guest" />
-                <input type="hidden" name="password" id="auth-password" value="guest" />
-                <input type="hidden" name="gw_address" id="gw_address" />
-                <input type="hidden" name="gw_port" id="gw_port" />
-                <input type="hidden" name="mac" id="mac" />
-                <input type="hidden" name="url" id="url" />
-            </form>
 
             <!-- STEP 1: User Details -->
             <div id="step-1-details">
@@ -89,7 +78,7 @@
             <div id="step-2-success">
                 <div class="success-icon">✓</div>
                 <div class="success-title">You're Connected!</div>
-                <p style="color: var(--text-muted);">A verification code and link have been sent to your Email and WhatsApp.</p>
+                <p style="color: var(--text-muted);">A verification link has been sent to your Email and WhatsApp.</p>
                 <p style="color: var(--error-color); font-size: 13px; font-weight: bold; margin-top: 15px;">Please verify your account to maintain access.</p>
                 
                 <div class="branding">
@@ -101,15 +90,21 @@
     </div>
 
     <script>
-        // PASTE YOUR NEW GOOGLE SCRIPT URL HERE
-          var googleScriptURL = "https://script.google.com/macros/s/AKfycbwgckjl7bwYNmpqU6H8g7_cod1v0IWvBVcsn5FS0jDbgAnRkRRsBuuNbHFRTeikwGXgQA/exec";  
+        // PASTE YOUR GOOGLE SCRIPT URL HERE
+        var googleScriptURL = "https://script.google.com/macros/s/AKfycbwgckjl7bwYNmpqU6H8g7_cod1v0IWvBVcsn5FS0jDbgAnRkRRsBuuNbHFRTeikwGXgQA/exec";   
+
+        // Capture Grandstream URL parameters on load
+        var gwAddress = "192.168.1.1";
+        var gwPort = "80";
+        var mac = "";
+        var url = "";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            document.getElementById('gw_address').value = urlParams.get('gw_address') || '192.168.1.1';
-            document.getElementById('gw_port').value = urlParams.get('gw_port') || '80';
-            document.getElementById('mac').value = urlParams.get('mac') || '';
-            document.getElementById('url').value = urlParams.get('url') || '';
+            gwAddress = urlParams.get('gw_address') || gwAddress;
+            gwPort = urlParams.get('gw_port') || gwPort;
+            mac = urlParams.get('mac') || mac;
+            url = urlParams.get('url') || url;
         };
 
         function processLogin() {
@@ -130,22 +125,25 @@
             btn.innerText = "Connecting..."; btn.disabled = true;
 
             // 1. Trigger Google Script to send Email/WhatsApp in the background
-            var url = googleScriptURL + "?action=send&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
+            var scriptUrl = googleScriptURL + "?action=send&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
             var img = new Image();
-            img.src = url;
+            img.src = scriptUrl;
 
             // 2. Show Success Screen
             document.getElementById('step-1-details').style.display = 'none';
             document.getElementById('step-2-success').style.display = 'block';
 
-            // 3. Wait 2 seconds, then log them into the router
+            // 3. Wait 2 seconds, then redirect to the Grandstream router login endpoint
+            // This avoids the HTTPS to HTTP "Bad Gateway" block!
             setTimeout(function() {
-                var gwAddress = document.getElementById('gw_address').value;
-                var gwPort = document.getElementById('gw_port').value;
+                var loginUrl = "http://" + gwAddress + ":" + gwPort + "/cgi-bin/luci/captive_portal/login";
+                loginUrl += "?username=guest&password=guest";
+                loginUrl += "&mac=" + encodeURIComponent(mac);
+                loginUrl += "&url=" + encodeURIComponent(url);
                 
-                document.getElementById('sendin-form').action = `http://${gwAddress}:${gwPort}/cgi-bin/luci/captive_portal/login`;
-                document.getElementById('sendin-form').submit();
-            }, 2000);
+                // Redirect the browser to the router to grant internet access
+                window.location.href = loginUrl;
+            }, 2500);
         }
     </script>
 </body>
