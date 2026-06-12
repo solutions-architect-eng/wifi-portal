@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,37 +7,30 @@
     <title>Wi-Fi Access Portal</title>
     <style>
         :root {
-            --primary-color: #F57C00; /* Beautiful Orange */
-            --primary-hover: #E65100; /* Darker Orange */
-            --bg-color: rgba(0,0,0,0.6);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #333333; 
-            --text-muted: #6c757d;
-            --border-color: #e0e0e0; 
-            --success-color: #28a745;
+            --primary-color: #F57C00; --primary-hover: #E65100;
+            --card-bg: rgba(255, 255, 255, 0.95); --text-main: #333333; --text-muted: #6c757d;
+            --border-color: #e0e0e0; --success-color: #28a745;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            /* Local Background Image */
-            background: url('bg.jpg') no-repeat center center fixed; 
-            background-size: cover;
+            background: url('bg.jpg') no-repeat center center fixed; background-size: cover;
             color: var(--text-main); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 20px;
         }
-        .container { width: 100%; max-width: 400px; background-color: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; backdrop-filter: blur(10px); }
+        .container { width: 100%; max-width: 400px; background-color: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; }
         .header { background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: white; text-align: center; padding: 30px 20px; }
         .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 5px; }
         .header p { font-size: 14px; opacity: 0.9; }
         .form-body { padding: 30px 25px; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--text-main); }
-        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; transition: border-color 0.2s; outline: none; background-color: #fff; }
+        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; background-color: #fff; }
         .form-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(245, 124, 0, 0.2); }
         .checkbox-group { display: flex; align-items: flex-start; margin-bottom: 25px; }
         .checkbox-group input { margin-top: 3px; margin-right: 10px; cursor: pointer; width: 16px; height: 16px; }
         .checkbox-group label { font-size: 12px; color: var(--text-muted); cursor: pointer; line-height: 1.4; }
-        .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
         .btn-connect:hover { background-color: var(--primary-hover); }
         .btn-connect:disabled { background-color: #FFB74D; cursor: not-allowed; }
         .branding { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
@@ -53,25 +46,23 @@
         </div>
         <div class="form-body">
             
-            <!-- THIS FORM POSTS DIRECTLY TO THE GRANDSTREAM GWN7001 API -->
-            <form id="router-login-form" method="post" action="/api/captiveportal/auth">
-                <input type="hidden" name="username" value="guest" />
-                <input type="hidden" name="password" value="guest" />
-                <input type="hidden" name="mac" id="mac" />
-                <input type="hidden" name="url" id="url" />
+            <!-- THIS FORM USES GRANDSTREAM'S NATIVE INTERNAL VARIABLES -->
+            <!-- It posts directly to the router and authenticates the Local User 'guest' -->
+            <form method="post" action="$(link-login-only)">
+                <input type="hidden" name="username" value="$(username)" />
+                <input type="hidden" name="password" value="$(password)" />
                 
-                <!-- User Input Fields -->
                 <div class="form-group">
                     <label for="user-name">Full Name</label>
-                    <input type="text" id="user-name" placeholder="e.g. John Doe" required autocomplete="off">
+                    <input type="text" id="user-name" name="user-name" placeholder="e.g. John Doe" required autocomplete="off">
                 </div>
                 <div class="form-group">
                     <label for="user-phone">Cellphone Number</label>
-                    <input type="tel" id="user-phone" value="+266" placeholder="+266XXXXXXXX" required autocomplete="off">
+                    <input type="tel" id="user-phone" name="user-phone" value="+266" placeholder="+266XXXXXXXX" required autocomplete="off">
                 </div>
                 <div class="form-group">
                     <label for="user-email">Email Address</label>
-                    <input type="email" id="user-email" placeholder="e.g. john@company.com" required autocomplete="off">
+                    <input type="email" id="user-email" name="user-email" placeholder="e.g. john@company.com" required autocomplete="off">
                 </div>
                 
                 <!-- THE GOLDEN RULE -->
@@ -92,34 +83,16 @@
 
     <script>
         // PASTE YOUR GOOGLE SCRIPT URL HERE
-        var googleScriptURL = "https://script.google.com/macros/s/AKfycbwJjSXAjtq1fH25CZji0BN_az0D_tW4EseAJXWErynI-AeBopj3wxEcLOY2NnHDKk2lLQ/exec"; 
+        var googleScriptURL = "https://script.google.com/macros/s/AKfycbwJjSXAjtq1fH25CZji0BN_az0D_tW4EseAJXWErynI-AeBopj3wxEcLOY2NnHDKk2lLQ/exec";  
 
-
-        window.onload = function() {
-            // 1. Capture Grandstream URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            var gwAddress = urlParams.get('gw_address') || '192.168.80.1';
-            var gwPort = urlParams.get('gw_port') || '443';
-            var mac = urlParams.get('mac') || '';
-            var url = urlParams.get('url') || '';
-
-            // 2. Populate the hidden router login form
-            document.getElementById('mac').value = mac;
-            document.getElementById('url').value = url;
-
-            // 3. Set the form action to your Grandstream's correct API endpoint
-            document.getElementById('router-login-form').action = "https://" + gwAddress + ":" + gwPort + "/api/captiveportal/auth";
-        };
-
-        // Intercept the form submission
-        document.getElementById('router-login-form').addEventListener('submit', function(event) {
+        document.getElementById('submit-btn').addEventListener('click', function(event) {
             var name = document.getElementById('user-name').value.trim();
             var phone = document.getElementById('user-phone').value.trim();
             var email = document.getElementById('user-email').value.trim();
             var checkbox = document.getElementById('privacy-check').checked;
 
             if (name === "" || phone === "" || email === "") { alert("Please fill in all fields."); event.preventDefault(); return; }
-            if (!checkbox) { alert("Please agree to the Terms & Conditions."); event.preventDefault(); return; }
+            if (!checkbox) { alert("Please agree to the Terms."); event.preventDefault(); return; }
             
             if (!phone.startsWith("+266")) {
                 phone = "+266" + phone.replace("+", "");
@@ -130,14 +103,11 @@
             btn.innerText = "Connecting..."; 
             btn.disabled = true;
 
-            // 1. Fire the data to Google Sheets in the background (Image trick)
+            // Fire the data to Google Sheets in the background (Image trick)
             var scriptUrl = googleScriptURL + "?name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
             var img = new Image();
             img.src = scriptUrl;
-
-            // 2. Allow the form to submit naturally to the Grandstream API (Grants Internet Instantly)
         });
     </script>
 </body>
 </html>
- 
