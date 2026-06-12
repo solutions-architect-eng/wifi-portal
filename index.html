@@ -32,12 +32,7 @@
         .btn-connect { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .btn-connect:hover { background-color: var(--primary-hover); }
         .btn-connect:disabled { background-color: #FFB74D; cursor: not-allowed; }
-        
-        /* Success Page Styling */
-        #step-2-success { display: none; text-align: center; }
-        .success-icon { font-size: 60px; color: var(--success-color); margin-bottom: 20px; }
-        .success-title { font-size: 24px; font-weight: 700; color: var(--success-color); margin-bottom: 10px; }
-        .branding { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .branding { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
         .branding h3 { color: var(--primary-color); font-size: 16px; margin-bottom: 5px; }
         .branding p { color: var(--text-muted); font-size: 13px; }
     </style>
@@ -49,8 +44,16 @@
             <p>Connect to the Internet</p>
         </div>
         <div class="form-body">
-            <!-- STEP 1: User Details -->
-            <div id="step-1-details">
+            
+            <!-- THIS IS THE FORM THAT LOGS YOU INTO THE ROUTER -->
+            <!-- It posts directly to the Grandstream router to grant internet -->
+            <form id="router-login-form" method="post" action="#">
+                <input type="hidden" name="username" value="guest" />
+                <input type="hidden" name="password" value="guest" />
+                <input type="hidden" name="mac" id="mac" />
+                <input type="hidden" name="url" id="url" />
+                
+                <!-- User Input Fields -->
                 <div class="form-group">
                     <label for="user-name">Full Name</label>
                     <input type="text" id="user-name" placeholder="e.g. John Doe" required autocomplete="off">
@@ -63,53 +66,52 @@
                     <label for="user-email">Email Address</label>
                     <input type="email" id="user-email" placeholder="e.g. john@company.com" required autocomplete="off">
                 </div>
+                
+                <!-- THE GOLDEN RULE -->
                 <div class="checkbox-group">
                     <input type="checkbox" id="privacy-check" required>
                     <label for="privacy-check">I certify this information is true. I agree to the Terms & Conditions and consent to my data being stored for 6 months.</label>
                 </div>
-                <button type="button" class="btn-connect" id="submit-btn" onclick="processLogin()">Connect to Internet</button>
-            </div>
 
-            <!-- STEP 2: Success Page -->
-            <div id="step-2-success">
-                <div class="success-icon">✓</div>
-                <div class="success-title">You're Connected!</div>
-                <p style="color: var(--text-muted);">Enjoy your internet access.</p>
-                
-                <div class="branding">
-                    <h3>Powered by T-Connect</h3>
-                    <p>Starlink Reseller</p>
-                </div>
+                <button type="submit" class="btn-connect" id="submit-btn">Connect to Internet</button>
+            </form>
+            
+            <div class="branding">
+                <h3>Powered by T-Connect</h3>
+                <p>Starlink Reseller</p>
             </div>
         </div>
     </div>
 
     <script>
         // PASTE YOUR NEW GOOGLE SCRIPT URL HERE
-        var googleScriptURL = "https://script.google.com/macros/s/AKfycbxTo-dSe23r7JLRas2Y_Q5uYeRdNSFNH6BLI7TFgkVfdi9iostJbE0zydncaeB2O3ulow/exec"; 
-
-        var gwAddress = "192.168.80.1"; // Your Grandstream Router IP
-        var gwPort = "443";             // 443 for HTTPS
-        var mac = "";
-        var url = "";
+        var googleScriptURL = "https://script.google.com/macros/s/AKfycbw59NVMGxzzo-BskemQ1-ORjdVOJYuBkA5cvXbkmg1L_RtEwzyUzawoPt05BtvBT8ic7A/exec"; 
 
         window.onload = function() {
+            // 1. Capture Grandstream URL parameters
             const urlParams = new URLSearchParams(window.location.search);
-            // These will override the defaults above if the router passes them in the URL
-            gwAddress = urlParams.get('gw_address') || gwAddress;
-            gwPort = urlParams.get('gw_port') || gwPort;
-            mac = urlParams.get('mac') || mac;
-            url = urlParams.get('url') || url;
+            var gwAddress = urlParams.get('gw_address') || '192.168.80.1';
+            var gwPort = urlParams.get('gw_port') || '443';
+            var mac = urlParams.get('mac') || '';
+            var url = urlParams.get('url') || '';
+
+            // 2. Populate the hidden router login form
+            document.getElementById('mac').value = mac;
+            document.getElementById('url').value = url;
+
+            // 3. Set the form action to your Grandstream's secure captive portal endpoint
+            document.getElementById('router-login-form').action = "https://" + gwAddress + ":" + gwPort + "/cgi-bin/luci/captive_portal/login";
         };
 
-        function processLogin() {
+        // Intercept the form submission
+        document.getElementById('router-login-form').addEventListener('submit', function(event) {
             var name = document.getElementById('user-name').value.trim();
             var phone = document.getElementById('user-phone').value.trim();
             var email = document.getElementById('user-email').value.trim();
             var checkbox = document.getElementById('privacy-check').checked;
 
-            if (name === "" || phone === "" || email === "") { alert("Please fill in all fields."); return; }
-            if (!checkbox) { alert("Please agree to the Terms."); return; }
+            if (name === "" || phone === "" || email === "") { alert("Please fill in all fields."); event.preventDefault(); return; }
+            if (!checkbox) { alert("Please agree to the Terms & Conditions."); event.preventDefault(); return; }
             
             if (!phone.startsWith("+266")) {
                 phone = "+266" + phone.replace("+", "");
@@ -117,28 +119,16 @@
             }
 
             var btn = document.getElementById('submit-btn');
-            btn.innerText = "Connecting..."; btn.disabled = true;
+            btn.innerText = "Connecting..."; 
+            btn.disabled = true;
 
-            // 1. Trigger Google Script to log data in the background
+            // 1. Fire the data to Google Sheets in the background (Image trick)
             var scriptUrl = googleScriptURL + "?action=log&name=" + encodeURIComponent(name) + "&phone=" + encodeURIComponent(phone) + "&email=" + encodeURIComponent(email);
             var img = new Image();
             img.src = scriptUrl;
 
-            // 2. Show Success Screen
-            document.getElementById('step-1-details').style.display = 'none';
-            document.getElementById('step-2-success').style.display = 'block';
-
-            // 3. Wait 2 seconds so user sees the branding, then redirect to router to grant internet
-            setTimeout(function() {
-                var loginUrl = "https://" + gwAddress + ":" + gwPort + "/cgi-bin/luci/captive_portal/login";
-                loginUrl += "?username=guest&password=guest";
-                loginUrl += "&mac=" + encodeURIComponent(mac);
-                loginUrl += "&url=" + encodeURIComponent(url);
-                
-                // Redirect the browser to the router to grant internet access
-                window.location.href = loginUrl;
-            }, 2000);
-        }
+            // 2. Allow the form to submit naturally to the router (Grants Internet Instantly)
+        });
     </script>
 </body>
 </html>
